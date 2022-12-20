@@ -2,37 +2,6 @@
 
 <head>
     <title>Population Simulation</title>
-    <style>
-        .slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 15px;
-            border-radius: 5px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            -webkit-transition: .2s;
-            transition: opacity .2s;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: #04AA6D;
-            cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: #04AA6D;
-            cursor: pointer;
-        }
-    </style>
 </head>
 
 <body>
@@ -44,23 +13,84 @@
         <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
             <label>Starting population size:</label>
             <br>
-            <input id="text" class="w3-input" width="25%"></textarea>
-            <br>
-            <div class="slidecontainer">
-                <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-            </div>
         </form>
-        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
-            <label>Enter initial value:</label>
-            <br>
-            <input id="initial" class="w3-input" width="25%"></textarea>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="starting" class="w3-input" width="25%" placeholder="20000"></input>
             <br>
         </form>
         <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
-            <label>Iterations to perform:</label>
+            <label>Dominant allele frequency (p ~ 0 - 1):</label>
             <br>
-            <input id="iterations" class="w3-input" width="25%"></textarea>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="p" class="w3-input" width="25%" placeholder="0.6"></input>
             <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Offspring (per person):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="offspring" class="w3-input" width="25%" placeholder="2"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Number of generations (to run the simulation for):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="generations" class="w3-input" width="25%" placeholder="3"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>How much variation should be allowed from the set offspring value (0 - 1):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="variation-0" class="w3-input" width="25%" placeholder="0.01"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>To how many offspring should the variation be limited to (±offspring):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="variation-1" class="w3-input" width="25%" placeholder="3"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Survival rate (pp ~ 0 - 1):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="survival-pp" class="w3-input" width="25%" placeholder="1.0"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Survival rate (pq ~ 0 - 1):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="survival-pq" class="w3-input" width="25%" placeholder="1.0"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Survival rate (qq ~ 0 - 1):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="survival-qq" class="w3-input" width="25%" placeholder="0.9"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
+            <label>Limit population size (artificially limits the population to make the simulation run faster):</label>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 43%; margin-right: 43%;">
+            <input id="limit" class="w3-input" width="25%" placeholder="0.9" type="checkbox"></input>
+            <br>
+        </form>
+        <form class="w3-container" style="text-align: center; margin-left: 25%; margin-right: 25%;">
             <button id="button" type="button" class="w3-btn w3-padding w3-blue" style="width:120px">Run
                 &nbsp;></button>
             <button id="cleartext" type="button" class="w3-btn w3-padding w3-teal" style="width: 120px">Clear
@@ -70,29 +100,7 @@
     <div class="w3-card-4" style="text-align: center;">
         <h3 id="result"></h3>
     </div>
-    <div class="w3-card-4" style="text-align: center;">
-        <h3>Some examples for how you can enter functions:</h3>
-        <dl>
-            <dt>x^2</dt>
-            <dt>2sin(x)</dt>
-            <dt>log(10000, sqrt(100))</dt>
-            <dt>See <a href="https://mathjs.org/docs/expressions/syntax.html">here</a> for more</dt>
-        </dl>
-    </div>
-    <div class="w3-card-4" style="text-align: center;">
-        <h3>There are several limitations to the Newton's Method, and these are reflected in this program too:</h3>
-        <dl>
-            <dt>Stops working with the iteration when f'(x) = 0 - This is why some initial values output NaN (not a
-                number)</dt>
-            <dt>Doesn't work if a function doesn't have a root - Some functions output random values, or even something
-                like Infinity</dt>
-            <dt>See <a
-                    href="https://en.wikipedia.org/wiki/Newton%27s_method#Failure_of_the_method_to_converge_to_the_root">here</a>
-                for more</dt>
-        </dl>
-    </div>
 </body>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <script src="bundle.js"></script>
-
 </html>
