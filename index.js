@@ -43,7 +43,7 @@ document.getElementById('button').onclick = () => {
     } else if (survivalRate.qq == NaN || survivalRate.qq < 0 || survivalRate.qq > 1) {
         document.getElementById('result').innerHTML = 'Survival rate (qq) must be a number between 0 and 1'
         return
-    } else if ((limit ? ((starting * offspring * generations) / 360000) : (starting * (offspring ** generations) / 10240000)) > 1) {
+    } else if ((limit ? ((starting * offspring * generations) / 102400000) : (starting * (offspring ** generations) / 10240000)) > 1) {
         document.getElementById('result').innerHTML = 'The simulation will take too long to run<br>Please reduce the starting population, offspring, or generations'
         return
     }
