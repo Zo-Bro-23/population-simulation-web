@@ -49,8 +49,6 @@ document.getElementById('button').onclick = () => {
         return
     }
 
-    console.log(variation)
-
     const button = document.getElementById('button')
     const h3 = document.getElementById('result')
 
