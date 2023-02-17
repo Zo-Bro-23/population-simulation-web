@@ -54,6 +54,7 @@ document.getElementById('button').onclick = () => {
 
     // button.disabled = true
     const results = populationSimulation.nonEquilibrium(p, starting, offspring, generations, variation, survivalRate, limit)
+    console.log(results)
     h3.innerHTML = `Total offspring: ${results.totalOffspring}<br>Number of offspring (pp): ${results.totalPP}<br>Number of offspring (pq): ${results.totalPQ}<br>Number of offspring (qq): ${results.totalQQ}<br>Allele frequency (p): ${results.p * 100}%<br>Allele frequency (q): ${results.q * 100}%<br>Genotype frequency (pp): ${results.pp * 100}%<br>Genotype frequency (pq): ${results.pq * 100}%<br>Genotype frequency (qq): ${results.qq * 100}%`
 }
 
