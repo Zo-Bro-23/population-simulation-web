@@ -15,6 +15,11 @@ document.getElementById('button').onclick = () => {
         qq: parseFloat(document.getElementById('survival-qq').value || 0.9)
     }
     const limit = document.getElementById('limit').checked
+    let log = document.getElementById('log').value
+
+    if (log == '0') {
+        log = generations
+    }
 
     if (starting == NaN || starting < 1) {
         document.getElementById('result').innerHTML = 'Starting population must be a number greater than 0'
@@ -48,13 +53,39 @@ document.getElementById('button').onclick = () => {
         return
     }
 
+    let computation = starting * (offspring ** generations - 1)/(generations - 2)
+
+    if (generations == 1) {
+        computation = starting * offspring
+    }
+
     const button = document.getElementById('button')
     const h3 = document.getElementById('result')
 
     // button.disabled = true
-    const results = populationSimulation.nonEquilibrium({ p, starting, offspring, generations, variation, survivalRate, limitPopulation: limit, verbose: log => { console.log('Generation log: ', log) } })
+
+    let currentGeneration = 1
+
+    const generationLogs = []
+
+    const logGenerations = []
+
+    for (i = 1; i < generations / log; i++) {
+        logGenerations.push(log * i)
+    }
+
+    const results = populationSimulation.nonEquilibrium({
+        p, starting, offspring, generations, variation, survivalRate, limitPopulation: limit, verbose: generationLog => {
+            console.log(currentGeneration, generationLog)
+            if (logGenerations.includes(currentGeneration)) {
+                generationLogs.push(`<b> Generation ${currentGeneration}</b><br>${formatResults(generationLog)}`)
+            }
+            currentGeneration++
+        }
+    })
     console.log(results)
-    h3.innerHTML = `Total offspring: ${results.totalOffspring}<br>Number of offspring (pp): ${results.totalPP}<br>Number of offspring (pq): ${results.totalPQ}<br>Number of offspring (qq): ${results.totalQQ}<br>Allele frequency (p): ${results.p * 100}%<br>Allele frequency (q): ${results.q * 100}%<br>Genotype frequency (pp): ${results.pp * 100}%<br>Genotype frequency (pq): ${results.pq * 100}%<br>Genotype frequency (qq): ${results.qq * 100}%`
+    generationLogs.push(`<b> Final Generation</b><br>${formatResults(results)}`)
+    h3.innerHTML = generationLogs.join('<br><br>')
 }
 
 document.getElementById('cleartext').onclick = () => {
@@ -83,4 +114,8 @@ function eventListeners(ids) {
     })
 }
 
-eventListeners(['starting', 'p', 'offspring', 'generations', 'variation-0', 'variation-1', 'survival-pp', 'survival-pq', 'survival-qq'])
+function formatResults(results) {
+    return `Total offspring: ${results.totalOffspring}<br>Number of offspring (pp): ${results.totalPP}<br>Number of offspring (pq): ${results.totalPQ}<br>Number of offspring (qq): ${results.totalQQ}<br>Allele frequency (p): ${results.p * 100}%<br>Allele frequency (q): ${results.q * 100}%<br>Genotype frequency (pp): ${results.pp * 100}%<br>Genotype frequency (pq): ${results.pq * 100}%<br>Genotype frequency (qq): ${results.qq * 100}%`
+}
+
+eventListeners(['starting', 'p', 'offspring', 'generations', 'variation-0', 'variation-1', 'survival-pp', 'survival-pq', 'survival-qq', 'log'])
