@@ -16,6 +16,11 @@ document.getElementById('button').onclick = () => {
         qq: parseFloat(document.getElementById('survival-qq').value || 0.9)
     }
     const limit = document.getElementById('limit').checked
+    let log = document.getElementById('log').value
+
+    if (log == '0') {
+        log = generations
+    }
 
     if (starting == NaN || starting < 1) {
         document.getElementById('result').innerHTML = 'Starting population must be a number greater than 0'
@@ -49,13 +54,35 @@ document.getElementById('button').onclick = () => {
         return
     }
 
+    console.log(starting * (offspring ** generations - 1)/(generations - 2))
+
     const button = document.getElementById('button')
     const h3 = document.getElementById('result')
 
     // button.disabled = true
-    const results = populationSimulation.nonEquilibrium(p, starting, offspring, generations, variation, survivalRate, limit)
+
+    let currentGeneration = 1
+
+    const generationLogs = []
+
+    const logGenerations = []
+
+    for (i = 1; i < generations / log; i++) {
+        logGenerations.push(log * i)
+    }
+
+    const results = populationSimulation.nonEquilibrium({
+        p, starting, offspring, generations, variation, survivalRate, limitPopulation: limit, verbose: generationLog => {
+            console.log(currentGeneration, generationLog)
+            if (logGenerations.includes(currentGeneration)) {
+                generationLogs.push(`<b> Generation ${currentGeneration}</b><br>${formatResults(generationLog)}`)
+            }
+            currentGeneration++
+        }
+    })
     console.log(results)
-    h3.innerHTML = `Total offspring: ${results.totalOffspring}<br>Number of offspring (pp): ${results.totalPP}<br>Number of offspring (pq): ${results.totalPQ}<br>Number of offspring (qq): ${results.totalQQ}<br>Allele frequency (p): ${results.p * 100}%<br>Allele frequency (q): ${results.q * 100}%<br>Genotype frequency (pp): ${results.pp * 100}%<br>Genotype frequency (pq): ${results.pq * 100}%<br>Genotype frequency (qq): ${results.qq * 100}%`
+    generationLogs.push(`<b> Final Generation</b><br>${formatResults(results)}`)
+    h3.innerHTML = generationLogs.join('<br><br>')
 }
 
 document.getElementById('cleartext').onclick = () => {
@@ -84,15 +111,28 @@ function eventListeners(ids) {
     })
 }
 
-eventListeners(['starting', 'p', 'offspring', 'generations', 'variation-0', 'variation-1', 'survival-pp', 'survival-pq', 'survival-qq'])
+function formatResults(results) {
+    return `Total offspring: ${results.totalOffspring}<br>Number of offspring (pp): ${results.totalPP}<br>Number of offspring (pq): ${results.totalPQ}<br>Number of offspring (qq): ${results.totalQQ}<br>Allele frequency (p): ${results.p * 100}%<br>Allele frequency (q): ${results.q * 100}%<br>Genotype frequency (pp): ${results.pp * 100}%<br>Genotype frequency (pq): ${results.pq * 100}%<br>Genotype frequency (qq): ${results.qq * 100}%`
+}
+
+eventListeners(['starting', 'p', 'offspring', 'generations', 'variation-0', 'variation-1', 'survival-pp', 'survival-pq', 'survival-qq', 'log'])
 },{"population-simulation":3}],2:[function(require,module,exports){
-function dynamicGeneration(p = 0.6, starting = 2000, offspring = 2, generations = 3, variation = [0.01, 3]) {
+function dynamicGeneration(options) {
+    const {
+        p = 0.6,
+        starting = 2000,
+        offspring = 2,
+        generations = 3,
+        variation = [0.01, 3],
+        limitPopulation = false,
+        verbose = false
+    } = options
     const nonEquilibrium = require('./nonEquilibrium')
-    return nonEquilibrium(p, starting, offspring, generations, variation, {
+    return nonEquilibrium({ p, starting, offspring, generations, variation, survivalRate: {
         pp: 1,
         pq: 1,
         qq: 1
-    })
+    }, limitPopulation, verbose})
 }
 
 module.exports = dynamicGeneration
@@ -109,20 +149,38 @@ module.exports = {
     nonEquilibrium
 }
 },{"./dynamicGeneration":2,"./multiGeneration":4,"./nonEquilibrium":5,"./singleGeneration":6}],4:[function(require,module,exports){
-function multiGeneration(p = 0.6, starting = 2000, offspring = 2, generations = 3) {
+function multiGeneration(options) {
+    const {
+        p = 0.6,
+        starting = 2000,
+        offspring = 2,
+        generations = 3,
+        limitPopulation = false,
+        verbose = false
+    } = options
     const dynamicGeneration = require('./dynamicGeneration')
-    return dynamicGeneration(p, starting, offspring, generations, [0, 0])
+    return dynamicGeneration({ p, starting, offspring, generations, variation: [0, 0], limitPopulation, verbose })
 }
 
 module.exports = multiGeneration
 },{"./dynamicGeneration":2}],5:[function(require,module,exports){
-function nonEquilibrium(p = 0.6, starting = 20000, offspring = 2, generations = 3, variation = [0.01, 3], survivalRate = {
-    pp: 1,
-    pq: 1,
-    qq: 0.9
-}, limitPopulation = false, verbose = false) {
+function nonEquilibrium(options) {
+    const {
+        p = 0.6,
+        starting = 20000,
+        offspring = 2,
+        generations = 3,
+        variation = [0.01, 3],
+        survivalRate = {
+            pp: 1,
+            pq: 1,
+            qq: 0.9
+        },
+        limitPopulation = false,
+        verbose = false
+    } = options
 
-    return processResults(singleGeneration(p, starting, 1, 0))
+    return processResults(singleGeneration(p, starting, 1, 1))
 
     function singleGeneration(xp, xoffspring, xgenerations, xindex) {
         let results = {
@@ -184,7 +242,7 @@ function nonEquilibrium(p = 0.6, starting = 20000, offspring = 2, generations = 
 
         if (xindex < generations) {
             if (verbose) {
-                console.log(processResults(results))
+                verbose(processResults(results))
             }
             return singleGeneration((results.pp * 2 + results.pq) / (totalOffspring * 2), offspring, limitPopulation ? starting : totalOffspring, xindex + 1)
         } else {
@@ -209,9 +267,14 @@ function processResults(results) {
 
 module.exports = nonEquilibrium
 },{}],6:[function(require,module,exports){
-function singleGeneration(p = 0.6, starting = 2000, offspring = 2) {
+function singleGeneration(options) {
+    const {
+        p = 0.6,
+        starting = 2000,
+        offspring = 2
+    } = options
     const multiGeneration = require('./multiGeneration')
-    return multiGeneration(p, starting, offspring, 1)
+    return multiGeneration({ p, starting, offspring, generations: 1, limitPopulation: false, verbose: false })
 }
 
 module.exports = singleGeneration
